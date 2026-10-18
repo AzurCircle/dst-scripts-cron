@@ -1,0 +1,29 @@
+name: Dispatch DST scripts update
+
+on:
+  schedule:
+    # Offset from the top of the hour to avoid scheduler load.
+    - cron: '17 */2 * * *'
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: dispatch-dst-scripts
+  cancel-in-progress: false
+
+jobs:
+  dispatch:
+    name: Trigger private workflow
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Trigger update workflow
+        env:
+          GH_TOKEN: ${{ secrets.DST_DISPATCH_TOKEN }}
+        run: |
+          set -euo pipefail
+          gh api -X POST \
+            repos/AzurCircle/DST-scripts/actions/workflows/update.yml/dispatches \
+            -f ref=master
